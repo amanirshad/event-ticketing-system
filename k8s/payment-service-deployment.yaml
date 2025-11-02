@@ -1,0 +1,185 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: ticketing-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: payment-service:latest
+        ports:
+        - containerPort: 3004
+        - containerPort: 9094
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: PORT
+        - name: MONGODB_URI
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: MONGODB_URI
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: REDIS_URL
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: JWT_SECRET
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: STRIPE_SECRET_KEY
+        - name: STRIPE_PUBLISHABLE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: STRIPE_PUBLISHABLE_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: STRIPE_WEBHOOK_SECRET
+        - name: PAYPAL_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: PAYPAL_CLIENT_ID
+        - name: PAYPAL_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: PAYPAL_CLIENT_SECRET
+        - name: PAYPAL_MODE
+          valueFrom:
+            secretKeyRef:
+              name: payment-service-secret
+              key: PAYPAL_MODE
+        - name: ORDER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: ORDER_SERVICE_URL
+        - name: NOTIFICATION_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: NOTIFICATION_SERVICE_URL
+        - name: USER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: USER_SERVICE_URL
+        - name: METRICS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: METRICS_ENABLED
+        - name: PROMETHEUS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: PROMETHEUS_PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: LOG_LEVEL
+        - name: IDEMPOTENCY_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: IDEMPOTENCY_TTL
+        - name: IDEMPOTENCY_REDIS_PREFIX
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: IDEMPOTENCY_REDIS_PREFIX
+        - name: ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: payment-service-config
+              key: ALLOWED_ORIGINS
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 3004
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 3004
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: ticketing-system
+spec:
+  selector:
+    app: payment-service
+  ports:
+  - name: http
+    port: 3004
+    targetPort: 3004
+  - name: metrics
+    port: 9094
+    targetPort: 9094
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service-nodeport
+  namespace: ticketing-system
+spec:
+  selector:
+    app: payment-service
+  ports:
+  - name: http
+    port: 3004
+    targetPort: 3004
+    nodePort: 30004
+  type: NodePort

@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  payment-service:
+    build: .
+    ports:
+      - "3004:3004"
+      - "9094:9094"  # Prometheus metrics port
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - MONGODB_URI=mongodb://mongodb:27017/payment-service
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-super-secret-jwt-key-here
+      - STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+      - PAYPAL_CLIENT_ID=your_paypal_client_id
+      - PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+      - PAYMENT_TEST_MODE=true
+      - ORDER_SERVICE_URL=http://order-service:3003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3005
+      - USER_SERVICE_URL=http://user-service:3001
+      - METRICS_ENABLED=true
+      - PROMETHEUS_PORT=9094
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=payment-service
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  mongo-express:
+    image: mongo-express:1.0.0
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - ticketing-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - ticketing-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - ticketing-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  grafana_data:
+
+networks:
+  ticketing-network:
+    driver: bridge
