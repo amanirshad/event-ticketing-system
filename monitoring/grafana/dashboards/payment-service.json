@@ -1,0 +1,164 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Payment Service Dashboard",
+    "tags": ["payment", "microservice"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Payment Requests Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(payments_total[5m])",
+            "legendFormat": "{{status}} - {{payment_method}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "requests/sec"
+          }
+        ],
+        "xAxes": [
+          {
+            "type": "time"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Payment Amount Distribution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(payment_amount_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(payment_amount_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "amount"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Payment Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(payment_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(payment_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "seconds"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Payment Status Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (status) (payments_total)",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Refund Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(refunds_total[5m])",
+            "legendFormat": "{{status}} - {{reason}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "refunds/sec"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Idempotency Hits",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "rate(idempotency_hits_total[5m])",
+            "legendFormat": "hits/sec"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Active Connections",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "active_connections",
+            "legendFormat": "connections"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Database Connections",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "database_connections",
+            "legendFormat": "{{state}}"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Redis Connections",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "redis_connections",
+            "legendFormat": "{{state}}"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "External Service Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(external_service_requests_total[5m])",
+            "legendFormat": "{{service}} - {{method}} - {{status}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "requests/sec"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s"
+  }
+}

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: ticketing-system
+data:
+  NODE_ENV: "production"
+  PORT: "3004"
+  MONGODB_URI: "mongodb://mongodb-service:27017/payment-service"
+  REDIS_URL: "redis://redis-service:6379"
+  ORDER_SERVICE_URL: "http://order-service:3003"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:3005"
+  USER_SERVICE_URL: "http://user-service:3001"
+  METRICS_ENABLED: "true"
+  PROMETHEUS_PORT: "9094"
+  LOG_LEVEL: "info"
+  IDEMPOTENCY_TTL: "3600"
+  IDEMPOTENCY_REDIS_PREFIX: "idempotency:payment:"
+  ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004,http://localhost:3005"
