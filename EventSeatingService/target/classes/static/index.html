@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Seating Service - Admin UI</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Seating Service — Basic UI</h1>
+
+    <section class="card">
+      <h2>Events</h2>
+      <div class="row">
+        <input id="newEventId" placeholder="eventId (EV001)">
+        <input id="newEventName" placeholder="eventName">
+        <button id="btnAddEvent">Add Event</button>
+        <button id="btnLoadEvents">Load Events</button>
+      </div>
+      <div id="eventsList">No events loaded</div>
+    </section>
+
+    <section class="card">
+      <h2>Seats / Holds / Stats</h2>
+      <div class="row">
+        <input id="eventId" placeholder="Event id (EV001)" value="E101">
+        <button id="btnLoadSeats">Load Seats</button>
+        <button id="btnLoadStats">Stats</button>
+      </div>
+      <div id="statsArea">Stats will appear here</div>
+      <h3>Seats</h3>
+      <div id="seatsArea">No seats</div>
+      <h3>Holds</h3>
+      <div id="holdsArea">No holds</div>
+    </section>
+
+    <section class="card">
+      <h2>Reserve Seats</h2>
+      <div class="row">
+        <input id="reserveEventId" placeholder="eventId (E101)">
+        <input id="reserveUserId" placeholder="userId">
+        <input id="reserveSeatCodes" placeholder='seatCodes (comma separated, e.g. A1,A2)'>
+        <input id="reserveIdempo" placeholder="idempotencyKey (optional)">
+        <button id="btnReserve">Reserve</button>
+      </div>
+      <div id="reserveResult">Reserve result will appear here</div>
+    </section>
+
+    <section class="card">
+      <h2>Allocate / Release</h2>
+      <div class="row">
+        <input id="allocHoldToken" placeholder="holdToken">
+        <input id="allocOrderId" placeholder="orderId">
+        <button id="btnAllocate">Allocate</button>
+        <button id="btnRelease">Release</button>
+      </div>
+      <div id="allocResult">Allocate/Release result will appear here</div>
+    </section>
+
+    <footer>
+      <small>Event Management</small>
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
+
+
+<!--<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Event Fetcher</title>
+</head>
+<body>
+    <h1>Fetch Events</h1>
+    <form th:action="@{v1/seating/events}" method="post">
+        <button type="submit">Fetch All Events</button>
+    </form>
+</body>
+</html> -->
