@@ -1,0 +1,179 @@
+{
+  "info": {
+    "name": "Payment Service API",
+    "description": "Payment Service API Collection for Kubernetes Demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["health"]
+        },
+        "description": "Check service health status"
+      }
+    },
+    {
+      "name": "Get Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('token', jsonData.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/auth/dev-token?userId=test_user",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["auth", "dev-token"],
+          "query": [
+            {"key": "userId", "value": "test_user"}
+          ]
+        },
+        "description": "Get authentication token"
+      }
+    },
+    {
+      "name": "Create Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"},
+          {"key": "Idempotency-Key", "value": "{{$guid}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": \"order_123\",\n  \"amount\": 5000,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"stripe\",\n  \"paymentMethodId\": \"pm_test_123\",\n  \"description\": \"Demo payment\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/payments/charge",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "payments", "charge"]
+        },
+        "description": "Create a new payment"
+      }
+    },
+    {
+      "name": "Get Payment by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/payments/{{paymentId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "payments", "{{paymentId}}"]
+        },
+        "description": "Get payment details by payment ID"
+      }
+    },
+    {
+      "name": "Get Payments by Order",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/payments/order/order_123",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "payments", "order", "order_123"]
+        },
+        "description": "Get all payments for an order"
+      }
+    },
+    {
+      "name": "Get Statistics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/payments/stats/overview",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "payments", "stats", "overview"]
+        },
+        "description": "Get payment statistics"
+      }
+    },
+    {
+      "name": "Update Payment Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"CANCELLED\",\n  \"reason\": \"Order cancelled by user\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/payments/{{paymentId}}/status",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "payments", "{{paymentId}}", "status"]
+        },
+        "description": "Update payment status (PENDING, SUCCESS, FAILED, REFUNDED, CANCELLED)"
+      }
+    },
+    {
+      "name": "Refund Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{token}}"},
+          {"key": "Idempotency-Key", "value": "{{$guid}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 2500,\n  \"reason\": \"requested_by_customer\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/payments/{{paymentId}}/refund",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "payments", "{{paymentId}}", "refund"]
+        },
+        "description": "Refund a payment (partial or full)"
+      }
+    }
+  ],
+  "variable": [
+    {"key": "token", "value": "", "type": "string"},
+    {"key": "paymentId", "value": "", "type": "string"}
+  ]
+}
+

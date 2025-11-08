@@ -9,6 +9,8 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  # Minikube uses 'standard' storage class by default
+  # If using hostPath, set storageClassName to "" or use hostPath provisioner
   storageClassName: standard
 
 ---

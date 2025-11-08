@@ -4,7 +4,7 @@
 # This script tests all scenarios for the payment service
 # ============================================================================
 
-$BASE_URL = "http://localhost:3004"
+$BASE_URL = "http://localhost:8080"
 $TEST_USER_ID = "dubeyakanksha28_db_user"
 $FAILED_TESTS = @()
 $PASSED_TESTS = @()
