@@ -20,6 +20,25 @@ services:
     networks:
       - ets-net
 
+  event-seating-service:
+    build:
+      context: ./EventSeatingService
+      dockerfile: Dockerfile
+    ports:
+      - "4000:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/event_seating?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SERVER_PORT=8080
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - ets-net
+
   # Redis for caching and distributed locking
   redis:
     image: redis:7-alpine

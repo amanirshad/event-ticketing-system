@@ -17,9 +17,7 @@ import com.event.seating.dto.ReserveResponse;
 import com.event.seating.dto.SeatStatusDto;
 import com.event.seating.model.EventSeat;
 import com.event.seating.model.Events;
-import com.event.seating.repository.EventsRepository;
 import com.event.seating.service.SeatingService;
-import com.fullstack.equipmentlendingportal.equipment.model.Equipment;
 
 import jakarta.validation.Valid;
 

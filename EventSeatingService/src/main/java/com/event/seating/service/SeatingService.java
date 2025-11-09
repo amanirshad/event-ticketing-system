@@ -169,6 +169,10 @@ public class SeatingService {
         }
     }
 
+    public Optional<SeatHold> getHoldDetails(String holdToken) {
+        return holdRepo.findByHoldToken(holdToken).stream().findFirst();
+    }
+
     // helper to map eventSeatId -> seatCode (naive single lookup)
     private String getSeatCodeByEventSeatId(String eventSeatId) {
         return seatRepo.findById(eventSeatId).map(EventSeat::getSeatCode).orElse(eventSeatId);

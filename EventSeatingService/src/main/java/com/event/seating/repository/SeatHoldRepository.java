@@ -19,6 +19,8 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, String> {
     List<SeatHold> findByHoldToken(String holdToken);
 
     Optional<SeatHold> findByIdempotencyKey(String idempotencyKey);
+
+    List<SeatHold> findByEventSeatIdIn(List<String> eventSeatIds);
     
     // Optional: method to lock a seathold row if needed
     @Lock(LockModeType.PESSIMISTIC_WRITE)
