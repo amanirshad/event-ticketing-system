@@ -1,0 +1,102 @@
+{
+  "title": "Infrastructure Overview",
+  "uid": "infra-overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["infrastructure", "prometheus"],
+  "templating": {
+    "list": [
+      {
+        "name": "job",
+        "label": "Service",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(process_resident_memory_bytes, job)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "CPU Usage (rate)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 9},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0
+        }
+      },
+      "targets": [
+        {
+          "expr": "100 * rate(process_cpu_seconds_total{job=~\"$job\"}[5m])",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 9},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      },
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes{job=~\"$job\"}",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Prometheus Scrape Metrics",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 9, "w": 12, "h": 9},
+      "targets": [
+        {
+          "expr": "increase(scrape_samples_post_metric_relabeling{job=~\"$job\"}[5m])",
+          "legendFormat": "Samples {{job}}",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(scrape_series_added{job=~\"$job\"}[5m])",
+          "legendFormat": "Series {{job}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Grafana Request Rate",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 9, "w": 12, "h": 9},
+      "targets": [
+        {
+          "expr": "rate(grafana_http_request_total{status!~\"5..\"}[5m])",
+          "legendFormat": "Grafana {{status}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "overwrite": true
+}

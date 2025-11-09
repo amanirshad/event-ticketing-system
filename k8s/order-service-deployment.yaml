@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: ticketing-system
+  labels:
+    app: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: order-service:latest
+          ports:
+            - containerPort: 3006
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: DB_HOST
+              value: "postgres"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              value: "postgres"
+            - name: DB_NAME
+              value: "orderdb"
+            - name: SEATING_URL
+              value: "http://seating-service:4000"
+            - name: PAYMENT_URL
+              value: "http://payment-service:3004"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: ticketing-system
+spec:
+  selector:
+    app: order-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
