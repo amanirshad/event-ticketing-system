@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Event List</title>
+</head>
+<body>
+    <h1>Events List</h1>
+    <div th:if="${v1/seating/events != null and not #lists.isEmpty(v1/seating/events)}">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event ID</th>
+                    <th>Event Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="event : ${v1/seating/events}">
+                    <td th:text="${event.eventId}"></td>
+                    <td th:text="${event.eventName}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:if="${v1/seating/events == null or #lists.isEmpty(v1/seating/events)}">
+        <p>No events found.</p>
+    </div>
+    <a href="/">Back</a>
+</body>
+</html>
