@@ -6,67 +6,477 @@
   },
   "item": [
     {
-      "name": "Order Service - Create Order",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Idempotency-Key", "value": "test-key-123" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"userId\": \"user1\",\n  \"eventId\": \"event1\",\n  \"seats\": [{\"seatId\": \"A1\"}]\n}"
+      "name": "User Service",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"secret\",\n  \"phone\": \"1234567890\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/users/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "users", "register"]
+            }
+          }
         },
-        "url": {
-          "raw": "http://localhost:3007/v1/orders",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "3007",
-          "path": ["v1", "orders"]
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"secret\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/users/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "users", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/users/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "users", "{{userId}}"]
+            }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Order Service - Get Order by ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3007/v1/orders/{{orderId}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "3007",
-          "path": ["v1", "orders", "{{orderId}}"]
+      "name": "Order Service",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"3\",\n  \"eventId\": \"368\",\n  \"seats\": [{\n    \"seatId\": \"A1\",\n    \"price\": 150\n  }]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3007/v1/orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3007",
+              "path": ["v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3007/v1/orders/{{orderId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3007",
+              "path": ["v1", "orders", "{{orderId}}"]
+            }
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3007/v1/orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3007",
+              "path": ["v1", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3007/v1/orders/{{orderId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3007",
+              "path": ["v1", "orders", "{{orderId}}"]
+            }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Order Service - Delete Order",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3007/v1/orders/{{orderId}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "3007",
-          "path": ["v1", "orders", "{{orderId}}"]
+      "name": "Payment Service",
+      "item": [
+        {
+          "name": "Service Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3004/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": [""]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3004/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3004/metrics",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": ["metrics"]
+            }
+          }
+        },
+        {
+          "name": "Acquire Dev Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3004/auth/dev-token?userId={{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": ["auth", "dev-token"],
+              "query": [
+                { "key": "userId", "value": "dev_user" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Charge Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"amount\": 157.5,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"CARD\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3004/api/payments/charge",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": ["api", "payments", "charge"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3004/api/payments/{{paymentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": ["api", "payments", "{{paymentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Payments by Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3004/api/payments/order/{{orderId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3004",
+              "path": ["api", "payments", "order", "{{orderId}}"]
+            }
+          }
         }
-      }
+      ]
     },
     {
-      "name": "Order Service - List Orders",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:3007/v1/orders",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "3007",
-          "path": ["v1", "orders"]
+      "name": "Catalog Service",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/v1/events",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["v1", "events"]
+            }
+          }
+        },
+        {
+          "name": "Get Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/v1/events/{{eventId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["v1", "events", "{{eventId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sample Event\",\n  \"eventType\": \"Concert\",\n  \"status\": \"ON_SALE\",\n  \"eventDate\": \"2025-12-31T18:00:00Z\",\n  \"basePrice\": 120.50,\n  \"currency\": \"INR\",\n  \"venueId\": 91\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3002/v1/events",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["v1", "events"]
+            }
+          }
+        },
+        {
+          "name": "List Venues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/v1/venues",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["v1", "venues"]
+            }
+          }
+        },
+        {
+          "name": "Get Venue with Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/v1/venues/{{venueId}}?includeEvents=true",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["v1", "venues", "{{venueId}}"],
+              "query": [
+                { "key": "includeEvents", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Seats by Event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/v1/seats?eventId={{eventId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["v1", "seats"],
+              "query": [
+                { "key": "eventId", "value": "1" }
+              ]
+            }
+          }
         }
-      }
+      ]
+    },
+    {
+      "name": "Event Seating Service",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/events",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "events"]
+            }
+          }
+        },
+        {
+          "name": "Add Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"E1001\",\n  \"eventName\": \"New Event\",\n  \"venue\": \"Venue A\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/events",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "events"]
+            }
+          }
+        },
+        {
+          "name": "Reserve Seats",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"E1001\",\n  \"userId\": \"3\",\n  \"seatCodes\": [\"A1\", \"A2\"],\n  \"idempotencyKey\": \"hold-001\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/reserve",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "reserve"]
+            }
+          }
+        },
+        {
+          "name": "Allocate Seats",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"holdToken\": \"hold-001\",\n  \"orderId\": \"{{orderId}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/allocate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "allocate"]
+            }
+          }
+        },
+        {
+          "name": "Release Seats",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"holdToken\": \"hold-001\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/release",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "release"]
+            }
+          }
+        },
+        {
+          "name": "Get Seat Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/events/{{eventId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "events", "{{eventId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Hold Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/v1/seating/hold/{{holdToken}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "4000",
+              "path": ["v1", "seating", "hold", "{{holdToken}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "Placeholder",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3005/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3005",
+              "path": [""]
+            }
+          }
+        }
+      ]
     }
   ]
 }
