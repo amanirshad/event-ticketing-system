@@ -173,6 +173,13 @@ Testing
 - **Automated E2E:** `node scripts/e2e-test.js` (see instructions above).
 - **API collection:** Import `event-ticketing-system.postman_collection.json` into Postman to hit individual service endpoints.
 - **Service-level tests:** Use the language-specific tooling within each service directory (e.g., Maven, npm test) to expand coverage.
+- **E2E log artifact:** Latest run output is captured at `log/e2e-run.log` (ANSI-stripped) with Docker service logs appended. Share this file with evaluators to demonstrate the narrated end-to-end workflow plus container activity (sample excerpt below).
+
+```text
+$ tail -n 40 log/e2e-run.log
+... (Health checks, user registration, catalog event creation, seating sync, order, payment, allocation, final order) ...
+✔ End-to-end flow completed successfully
+```
 
 Monitoring & Kubernetes
 

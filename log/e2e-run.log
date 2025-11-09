@@ -1,0 +1,229 @@
+──────────────────────────────────────────────────────────────────────
+▶ Health checks
+Purpose:
+'Ensure catalog-service, payment-service, and order-service are reachable before continuing.'
+✔ Catalog health
+{
+  status: 'ok',
+  service: 'catalog-service',
+  timestamp: '2025-11-09T16:47:15.775Z'
+}
+✔ Payment health
+{
+  uptime: 1552.620363789,
+  message: 'OK',
+  timestamp: '2025-11-09T16:47:15.647Z',
+  service: 'payment-service',
+  version: '1.0.0',
+  environment: 'production',
+  correlationId: '85d22aa9-bb77-4e63-a132-f7f8ac58b81c',
+  database: 'connected',
+  redis: 'connected',
+  externalServices: { stripe: 'not_configured', paypal: 'not_configured' }
+}
+──────────────────────────────────────────────────────────────────────
+▶ Register user (user-service)
+Purpose:
+'Create a fresh account via user-service so we can place an order later.'
+✔ User registered
+{
+  userId: 16,
+  name: 'E2E Tester',
+  email: 'tester_1762706835829@example.com',
+  phone: '9999999999',
+  createdAt: '2025-11-09T16:47:16.383696'
+}
+──────────────────────────────────────────────────────────────────────
+▶ Login user (user-service)
+Purpose:
+'Validate credentials and simulate real login flow.'
+✔ Login response
+'Login successful'
+──────────────────────────────────────────────────────────────────────
+▶ Create event in catalog (catalog-service)
+Purpose:
+'Seed an event record that downstream services (seating, order) can reference.'
+✔ Catalog event created
+{
+  id: 431,
+  legacyId: null,
+  title: 'Demo Concert',
+  slug: 'demo-concert-1762706837397',
+  eventType: 'Concert',
+  status: 'ON_SALE',
+  eventDate: '2025-11-10T16:47:15.000Z',
+  basePrice: 250,
+  currency: 'INR',
+  description: null,
+  tags: [],
+  isPublished: true,
+  venue: { id: 91, name: 'Venue 1', city: 'Pune', state: null },
+  seatSummary: null,
+  createdAt: '2025-11-09T16:47:17.000Z',
+  updatedAt: '2025-11-09T16:47:17.000Z'
+}
+──────────────────────────────────────────────────────────────────────
+▶ Sync event into seating service (event-seating-service)
+Purpose:
+'Inform the seating microservice about the new event so seats can be managed.'
+──────────────────────────────────────────────────────────────────────
+▶ Seed seating inventory (event-seating-service)
+Purpose:
+'Populate seats A1-A3 so reservations have something to act on.'
+──────────────────────────────────────────────────────────────────────
+▶ Verify seats available (event-seating-service)
+Purpose:
+'Double-check the recently seeded seats are active and AVAILABLE.'
+Seats status sample:
+[
+  {
+    eventSeatId: '1167834c-f074-4a7f-a562-4518df53099f',
+    seatCode: 'A3',
+    seatNumber: 3,
+    section: 'Main',
+    rowLabel: 'A',
+    status: 'AVAILABLE',
+    holdToken: null,
+    userId: null,
+    holdExpiry: null
+  },
+  {
+    eventSeatId: '8f28fee6-a594-454d-a0c6-da81e9a9a18b',
+    seatCode: 'A1',
+    seatNumber: 1,
+    section: 'Main',
+    rowLabel: 'A',
+    status: 'AVAILABLE',
+    holdToken: null,
+    userId: null,
+    holdExpiry: null
+  },
+  {
+    eventSeatId: 'dd65b5a0-83e6-4e48-989b-b5e705d23311',
+    seatCode: 'A2',
+    seatNumber: 2,
+    section: 'Main',
+    rowLabel: 'A',
+    status: 'AVAILABLE',
+    holdToken: null,
+    userId: null,
+    holdExpiry: null
+  }
+]
+──────────────────────────────────────────────────────────────────────
+▶ Reserve seats (event-seating-service)
+Purpose:
+'Hold seats A1 and A2 for the user, simulating the RESERVE call from order-service.'
+✔ Reserve response
+{
+  holdToken: 'e6b1de8e-a269-4948-be5e-9003819bc770',
+  holdExpiry: '2025-11-09T22:18:49.157572127+05:30',
+  reservedSeatCodes: [ 'A1', 'A2' ],
+  message: 'Seats reserved (hold)'
+}
+──────────────────────────────────────────────────────────────────────
+▶ Create order (order-service)
+Purpose:
+'Persist the purchase request with details of the reserved seats.'
+✔ Order created
+{
+  id: 14,
+  external_id: 'f504d8ac-80f1-418b-a607-53b2ba195d82',
+  status: 'CONFIRMED',
+  subtotal: '500.00',
+  tax: '25.00',
+  total: '525.00',
+  currency: 'USD',
+  payment_id: 1,
+  user_id: 16,
+  created_at: '2025-11-09T16:47:19.000Z'
+}
+──────────────────────────────────────────────────────────────────────
+▶ Acquire payment auth token (payment-service)
+Purpose:
+'Get a development JWT so we can authorize the payment charge request.'
+──────────────────────────────────────────────────────────────────────
+▶ Charge payment (payment-service)
+Purpose:
+'Simulate billing the customer for the reserved seats.'
+✔ Payment charge
+{
+  success: true,
+  message: 'Payment processed successfully',
+  data: {
+    paymentId: 'pay_1762706840404_2569e071',
+    status: 'PENDING',
+    amount: 525,
+    currency: 'USD',
+    expiresAt: '2025-11-09T17:02:20.406Z'
+  },
+  correlationId: '498245db-3640-4645-94a0-8f4ce57c88d3'
+}
+──────────────────────────────────────────────────────────────────────
+▶ Allocate seats (event-seating-service)
+Purpose:
+'Commit the reservation now that payment succeeded.'
+✔ Seats allocated
+──────────────────────────────────────────────────────────────────────
+▶ Fetch final order (order-service)
+Purpose:
+'Retrieve order, items, and tickets to validate the entire flow.'
+✔ Final order
+{
+  order: {
+    id: 14,
+    external_id: 'f504d8ac-80f1-418b-a607-53b2ba195d82',
+    status: 'CONFIRMED',
+    subtotal: '500.00',
+    tax: '25.00',
+    total: '525.00',
+    currency: 'USD',
+    payment_id: 1,
+    user_id: 16,
+    created_at: '2025-11-09T16:47:19.000Z'
+  },
+  items: [
+    {
+      id: 20,
+      order_id: 14,
+      seat_id: 'mock-seat-1',
+      seat_label: 'A1',
+      section: null,
+      price: '250.00',
+      quantity: 1
+    },
+    {
+      id: 21,
+      order_id: 14,
+      seat_id: 'mock-seat-2',
+      seat_label: 'A2',
+      section: null,
+      price: '250.00',
+      quantity: 1
+    }
+  ],
+  tickets: [
+    {
+      id: 20,
+      order_id: 14,
+      ticket_ref: 'TKT-d6e773b7-633a-44e4-8631-4eaab9246ae4',
+      seat_id: 'mock-seat-1',
+      seat_label: 'A1',
+      price: '250.00',
+      status: 'ISSUED',
+      issued_at: '2025-11-09T16:47:19.000Z'
+    },
+    {
+      id: 21,
+      order_id: 14,
+      ticket_ref: 'TKT-a9c9eff3-f113-4d0f-abe5-b7958553534a',
+      seat_id: 'mock-seat-2',
+      seat_label: 'A2',
+      price: '250.00',
+      status: 'ISSUED',
+      issued_at: '2025-11-09T16:47:19.000Z'
+    }
+  ]
+}
+──────────────────────────────────────────────────────────────────────
+✔ End-to-end flow completed successfully
