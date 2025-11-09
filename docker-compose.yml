@@ -102,7 +102,7 @@ services:
       - "3004:3004"
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://mongodb:27017/payment-service
+      - MONGODB_URI=mongodb://root:example@mongodb:27017/payment-service?authSource=admin
       - REDIS_URL=redis://redis:6379
     depends_on:
       - mongodb

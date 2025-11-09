@@ -3,6 +3,7 @@ package com.event.seating.service;
 import com.event.seating.dto.AllocateRequest;
 import com.event.seating.dto.ReserveRequest;
 import com.event.seating.dto.ReserveResponse;
+import com.event.seating.dto.SeatCreateRequest;
 import com.event.seating.dto.SeatStatusDto;
 import com.event.seating.model.EventSeat;
 import com.event.seating.model.Events;
@@ -15,6 +16,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -46,12 +48,54 @@ public class SeatingService {
         this.holdTtlSeconds = ttl;
     }
 
-    
+    /**
+     * Returns all events
+     */
     public List<Events> listEvents()
     {
     	return eventsRepo.findAll();
     }
-    
+
+    @Transactional
+    public List<EventSeat> addSeatsToEvent(String eventId, List<SeatCreateRequest> seats) {
+        Events event = eventsRepo.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+
+        List<EventSeat> existingSeats = seatRepo.findByEventId(eventId);
+        Set<String> existingCodes = existingSeats.stream()
+                .map(EventSeat::getSeatCode)
+                .collect(Collectors.toSet());
+        int nextNumber = existingSeats.stream()
+                .map(EventSeat::getSeatNumber)
+                .filter(Objects::nonNull)
+                .max(Integer::compareTo)
+                .orElse(0) + 1;
+
+        List<EventSeat> created = new ArrayList<>();
+        for (SeatCreateRequest req : seats) {
+            if (req.getSeatCode() == null || req.getSeatCode().isBlank()) {
+                throw new IllegalArgumentException("Seat code is required");
+            }
+            if (existingCodes.contains(req.getSeatCode())) {
+                continue; // skip duplicates
+            }
+
+            EventSeat seat = new EventSeat();
+            seat.setId(UUID.randomUUID().toString());
+            seat.setEventId(event.getEventId());
+            seat.setSeatCode(req.getSeatCode());
+            seat.setSection(req.getSection());
+            seat.setRowLabel(req.getRowLabel());
+            seat.setSeatNumber(Optional.ofNullable(req.getSeatNumber()).orElse(nextNumber++));
+            BigDecimal price = Optional.ofNullable(req.getPrice()).orElse(BigDecimal.valueOf(250));
+            seat.setPrice(price);
+            created.add(seat);
+            existingCodes.add(req.getSeatCode());
+        }
+
+        return created.isEmpty() ? Collections.emptyList() : seatRepo.saveAll(created);
+    }
+
     @Transactional
     public ReserveResponse reserve(ReserveRequest req) {
         // Idempotency

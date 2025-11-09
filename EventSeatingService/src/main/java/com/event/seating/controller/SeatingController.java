@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.event.seating.dto.AllocateRequest;
 import com.event.seating.dto.ReserveRequest;
 import com.event.seating.dto.ReserveResponse;
+import com.event.seating.dto.SeatCreateRequest;
 import com.event.seating.dto.SeatStatusDto;
 import com.event.seating.model.EventSeat;
 import com.event.seating.model.Events;
@@ -64,12 +65,18 @@ public class SeatingController {
     }
     
     @GetMapping("/events/{id}")
-	public ResponseEntity<List<SeatStatusDto>> getEventSeat(@PathVariable("eventId") String id)
+	public ResponseEntity<List<SeatStatusDto>> getEventSeat(@PathVariable("id") String id)
 	{
     	    List<SeatStatusDto> eve = seatingService.getSeatStatusForEvent(id);
 		return ResponseEntity.ok(eve);
     }
-    
+
+	@PostMapping("/events/{eventId}/seats")
+	public ResponseEntity<List<EventSeat>> addSeats(@PathVariable("eventId") String eventId,
+			@Valid @RequestBody List<SeatCreateRequest> seats) {
+		List<EventSeat> saved = seatingService.addSeatsToEvent(eventId, seats);
+		return ResponseEntity.ok(saved);
+	}
 
     @GetMapping("/hold/{holdToken}")
     public ResponseEntity<?> getHold(@PathVariable String holdToken) {
