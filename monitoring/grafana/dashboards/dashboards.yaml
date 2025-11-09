@@ -1,0 +1,15 @@
+apiVersion: 1
+
+providers:
+  - name: Microservices Dashboards
+    orgId: 1
+    folder: Microservices
+    folderUid: microservices
+    type: file
+    disableDeletion: false
+    editable: true
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      recursive: true

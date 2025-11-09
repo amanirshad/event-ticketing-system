@@ -1,0 +1,72 @@
+{
+  "info": {
+    "_postman_id": "event-ticketing-system-collection-v2",
+    "name": "Event Ticketing System APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Order Service - Create Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Idempotency-Key", "value": "test-key-123" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user1\",\n  \"eventId\": \"event1\",\n  \"seats\": [{\"seatId\": \"A1\"}]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3007/v1/orders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3007",
+          "path": ["v1", "orders"]
+        }
+      }
+    },
+    {
+      "name": "Order Service - Get Order by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3007/v1/orders/{{orderId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3007",
+          "path": ["v1", "orders", "{{orderId}}"]
+        }
+      }
+    },
+    {
+      "name": "Order Service - Delete Order",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3007/v1/orders/{{orderId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3007",
+          "path": ["v1", "orders", "{{orderId}}"]
+        }
+      }
+    },
+    {
+      "name": "Order Service - List Orders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3007/v1/orders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3007",
+          "path": ["v1", "orders"]
+        }
+      }
+    }
+  ]
+}

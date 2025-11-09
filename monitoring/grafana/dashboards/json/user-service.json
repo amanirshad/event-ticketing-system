@@ -1,0 +1,77 @@
+{
+  "title": "User Service Dashboard",
+  "uid": "user-service",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["user", "spring"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Requests",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{job=\"user-service\"}[5m])",
+          "legendFormat": "{{method}} {{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Request Duration (p95)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job=\"user-service\"}[5m]))",
+          "legendFormat": "p95",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.5, rate(http_server_requests_seconds_bucket{job=\"user-service\"}[5m]))",
+          "legendFormat": "p50",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "JVM Memory",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{job=\"user-service\",area=\"heap\"}",
+          "legendFormat": "Heap",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_memory_used_bytes{job=\"user-service\",area=\"nonheap\"}",
+          "legendFormat": "Non-heap",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "process_cpu_usage{job=\"user-service\"} * 100",
+          "legendFormat": "CPU %",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
