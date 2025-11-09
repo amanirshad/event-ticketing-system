@@ -81,23 +81,60 @@ Local Setup
 
 Clone the repository:
 
-git clone https://github.com/amanirshad/event-ticketing-system.git  
-cd event-ticketing-system  
+```bash
+git clone https://github.com/amanirshad/event-ticketing-system.git
+cd event-ticketing-system
+```
 
+Run the helper script (builds images, captures baseline health checks, applies shared manifests):
 
-Run the setup script (initialise environment, create databases etc):
-
-./setup-local.sh  
-
+```bash
+./setup-local.sh
+```
 
 Launch all services locally via Docker Compose:
 
-docker-compose up --build  
+```bash
+docker-compose up --build
+```
 
+Key endpoints (see `docker-compose.yml` for the complete list):
 
-Access the services — e.g., user-service at http://localhost:<port> (ports configured in docker-compose.yml).
+| Service | URL |
+| --- | --- |
+| user-service | http://localhost:8080 |
+| catalog-service | http://localhost:3002 |
+| order-service | http://localhost:3007 |
+| payment-service | http://localhost:3004 |
+| event-seating-service | http://localhost:4000 |
+| notification-service | http://localhost:3005 |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 |
 
-Use the provided Postman collection (event-ticketing-system.postman_collection.json) to test endpoints.
+Use the provided Postman collection (`event-ticketing-system.postman_collection.json`) for manual API testing.
+
+### End-to-End Flow Test
+
+The automated script in `scripts/e2e-test.js` executes the complete “buy tickets” flow:
+
+1. Register and log in a user.
+2. Create an event in catalog and synchronise it with event-seating.
+3. Seed seats for the event and verify availability.
+4. Reserve seats via the seating service.
+5. Create an order and obtain a payment dev token.
+6. Charge the order using payment-service.
+7. Allocate seat holds and fetch the final order summary.
+
+Run the script once the Docker stack is up:
+
+```bash
+npm install axios uuid    # first run only (installs axios & uuid)
+node scripts/e2e-test.js
+```
+
+The script logs each step and finishes with `End-to-end flow completed successfully`, printing the final order/tickets JSON. Adjust the base URLs inside the script if you change ports or target Kubernetes.
+
+> **Note:** payment-service expects MongoDB credentials. The default Compose URI is `mongodb://root:example@mongodb:27017/payment-service?authSource=admin`. Update it if your Mongo credentials differ.
 
 Service List
 
@@ -133,19 +170,9 @@ Ensure you configure monitoring, logging, tracing for full observability (check 
 
 Testing
 
-Use the Postman collection provided (event-ticketing-system.postman_collection.json) to test the endpoints, flows like:
-
-User login/register
-
-Browse events (via catalog)
-
-Reserve tickets (order service)
-
-Process payment (payment-service)
-
-Send confirmation (notification-service)
-
-Use service-specific test frameworks (unit tests, integration tests) within each service folder (depending on language) to ensure functionality.
+- **Automated E2E:** `node scripts/e2e-test.js` (see instructions above).
+- **API collection:** Import `event-ticketing-system.postman_collection.json` into Postman to hit individual service endpoints.
+- **Service-level tests:** Use the language-specific tooling within each service directory (e.g., Maven, npm test) to expand coverage.
 
 Monitoring & Kubernetes
 
