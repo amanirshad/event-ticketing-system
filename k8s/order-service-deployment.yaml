@@ -6,7 +6,7 @@ metadata:
   labels:
     app: order-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: order-service
@@ -18,31 +18,45 @@ spec:
       containers:
         - name: order-service
           image: order-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 3006
+            - containerPort: 3000
+              name: http
           resources:
-            limits:
+            requests:
               memory: "256Mi"
-              cpu: "250m"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "400m"
           env:
             - name: NODE_ENV
               value: "production"
             - name: PORT
               value: "3000"
             - name: DB_HOST
-              value: "postgres"
+              value: "mysql"
             - name: DB_PORT
-              value: "5432"
+              value: "3306"
             - name: DB_USER
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: username
             - name: DB_PASSWORD
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: password
             - name: DB_NAME
-              value: "orderdb"
+              value: "etsr_users"
             - name: SEATING_URL
-              value: "http://seating-service:4000"
+              value: "http://event-seating-service:8080"
             - name: PAYMENT_URL
               value: "http://payment-service:3004"
+          envFrom:
+            - configMapRef:
+                name: order-service-config
 ---
 apiVersion: v1
 kind: Service

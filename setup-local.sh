@@ -1,23 +1,35 @@
 #!/bin/bash
 
-# Exit on error
-set -e
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+OUTPUT_DIR="$ROOT_DIR/docs/local-run"
+mkdir -p "$OUTPUT_DIR"
 
 echo "🚀 Starting local environment setup..."
 
-# Build Docker images
-echo "🔨 Building Docker images..."
+echo "🔨 Building Docker images via docker-compose..."
+docker-compose -f "$ROOT_DIR/docker-compose.yml" build
 
-# Build user service
-cd user-service
-mvn clean package -DskipTests
-cd ..
-docker build -t user-service:latest ./user-service
+echo "🐳 Starting docker-compose stack..."
+docker-compose -f "$ROOT_DIR/docker-compose.yml" up -d
 
-# Build payment service
-cd payment-service
-docker build -t payment-service:latest .
-cd ..
+echo "⏳ Waiting for core services to respond..."
+sleep 15
+
+echo "📸 Capturing docker ps output..."
+docker ps > "$OUTPUT_DIR/docker-ps.txt"
+
+echo "🩺 Hitting service health endpoints..."
+curl -s "http://localhost:3004/health" | tee "$OUTPUT_DIR/payment-health.json"
+curl -s "http://localhost:3002/health" | tee "$OUTPUT_DIR/catalog-health.json"
+curl -s "http://localhost:8080/actuator/health" | tee "$OUTPUT_DIR/user-health.json" || true
+curl -s "http://localhost:3007/v1/orders" | tee "$OUTPUT_DIR/order-sample.json" || true
+
+echo "🧹 Cleaning up local docker stack..."
+docker-compose -f "$ROOT_DIR/docker-compose.yml" down
+
+cd "$ROOT_DIR"
 
 # Start Minikube if not running
 if ! minikube status &> /dev/null; then
@@ -32,25 +44,31 @@ if ! minikube status &> /dev/null; then
     minikube addons enable metrics-server
 fi
 
-# Create namespace if it doesn't exist
-kubectl apply -f k8s/namespace.yaml
+# Target Kubernetes manifests
+K8S_DIR="$ROOT_DIR/k8s"
 
-# Set up MongoDB
-kubectl apply -f k8s/mongodb-deployment.yaml
-kubectl apply -f k8s/pvc.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secret.yaml
+kubectl apply -f "$K8S_DIR/namespace.yaml"
 
-# Set up Redis
-kubectl apply -f k8s/redis-deployment.yaml
+# Core data stores and shared config
+kubectl apply -f "$K8S_DIR/pvc.yaml"
+kubectl apply -f "$K8S_DIR/configmap.yaml"
+kubectl apply -f "$K8S_DIR/secret.yaml"
+kubectl apply -f "$K8S_DIR/mongodb-deployment.yaml"
+kubectl apply -f "$K8S_DIR/redis-deployment.yaml"
 
-# Deploy monitoring
-kubectl apply -f k8s/monitoring/
+# Deploy monitoring stack (Prometheus + Grafana)
+kubectl apply -f "$K8S_DIR/prometheus-config.yaml"
+kubectl apply -f "$K8S_DIR/prometheus-deployment.yaml"
+kubectl apply -f "$K8S_DIR/grafana-deployment.yaml"
 
-# Deploy services
+# Deploy application services
 echo "🚀 Deploying services to Kubernetes..."
-kubectl apply -f k8s/user-service-deployment.yaml
-kubectl apply -f k8s/payment-service-deployment.yaml
+kubectl apply -f "$K8S_DIR/user-service-deployment.yaml"
+kubectl apply -f "$K8S_DIR/payment-service-deployment.yaml"
+kubectl apply -f "$K8S_DIR/order-service-deployment.yaml"
+kubectl apply -f "$K8S_DIR/catalog-service-deployment.yaml"
+kubectl apply -f "$K8S_DIR/event-seating-service-deployment.yaml"
+kubectl apply -f "$K8S_DIR/notification-service-deployment.yaml"
 
 # Wait for all pods to be ready
 echo "⏳ Waiting for pods to be ready..."

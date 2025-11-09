@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+  namespace: ticketing-system
+data:
+  ORDER_SERVICE_LOG_LEVEL: "info"

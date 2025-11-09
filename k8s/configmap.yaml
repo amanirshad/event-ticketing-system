@@ -17,3 +17,37 @@ data:
   IDEMPOTENCY_TTL: "3600"
   IDEMPOTENCY_REDIS_PREFIX: "idempotency:payment:"
   ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004,http://localhost:3005"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+  namespace: ticketing-system
+data:
+  ORDER_SERVICE_LOG_LEVEL: "info"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalog-service-config
+  namespace: ticketing-system
+data:
+  NODE_ENV: "production"
+  PORT: "3002"
+  DB_HOST: "mysql"
+  DB_PORT: "3306"
+  DB_NAME: "etsr_users"
+  CATALOG_SEED_DIR: "/app/data"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-seating-service-config
+  namespace: ticketing-system
+data:
+  SPRING_PROFILES_ACTIVE: "k8s"
+  SERVER_PORT: "8080"
+  SEATING_HOLD_TTL_SECONDS: "900"
